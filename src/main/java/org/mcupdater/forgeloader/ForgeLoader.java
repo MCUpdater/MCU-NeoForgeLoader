@@ -41,11 +41,11 @@ public class ForgeLoader {
 			e.printStackTrace();
 			monitor = ProgressCallback.withOutputs(new OutputStream[]{System.out});
 		}
-		switch(side) {
-			case "Client":
+		switch(side.toLowerCase()) {
+			case "client":
 				action = new ClientInstall(profile, monitor);
 				break;
-			case "Server":
+			case "server":
 				action = new ServerInstall(profile, monitor);
 				break;
 			default:
