@@ -1,9 +1,8 @@
 package org.mcupdater.forgeloader;
 
-import net.minecraftforge.installer.ProgressFrame;
 import net.minecraftforge.installer.SimpleInstaller;
 import net.minecraftforge.installer.actions.*;
-import net.minecraftforge.installer.json.Install;
+import net.minecraftforge.installer.json.InstallV1;
 import net.minecraftforge.installer.json.OptionalLibrary;
 import net.minecraftforge.installer.json.Util;
 
@@ -16,7 +15,7 @@ import java.util.function.Predicate;
 
 public class ForgeLoader {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ClassNotFoundException {
 		File installPath = new File(args[0]);
 		String side = args[1];
 
@@ -33,7 +32,7 @@ public class ForgeLoader {
 		List<OptionalListEntry> optionals = new ArrayList<>();
 		Action action;
 
-		Install profile = Util.loadInstallProfile();
+		InstallV1 profile = Util.loadInstallProfile();
 		ProgressCallback monitor;
 		try {
 			monitor = ProgressCallback.withOutputs(new OutputStream[]{System.out, getLog()});
@@ -56,7 +55,8 @@ public class ForgeLoader {
 			return !ent.isPresent() || ent.get().isEnabled();
 		};
 		try {
-			action.run(installPath, optPred);
+			String path = ClientInstall.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+			action.run(installPath, optPred, new File(path));
 		} catch (ActionCanceledException e) {
 			e.printStackTrace();
 		}
