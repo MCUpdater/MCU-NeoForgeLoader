@@ -8,6 +8,7 @@ import net.minecraftforge.installer.json.Util;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +58,11 @@ public class ForgeLoader {
 		try {
 			String path = ClientInstall.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 			action.run(installPath, optPred, new File(path));
-		} catch (ActionCanceledException e) {
+			Path versions = installPath.toPath().resolve("versions");
+			if (versions.resolve(profile.getMinecraft()).resolve(profile.getMinecraft() + ".jar").toFile().exists() && !versions.resolve(profile.getVersion()).resolve(profile.getVersion() + ".jar").toFile().exists()) {
+				Files.copy(versions.resolve(profile.getMinecraft()).resolve(profile.getMinecraft() + ".jar"), versions.resolve(profile.getVersion()).resolve(profile.getVersion() + ".jar"));
+			}
+		} catch (ActionCanceledException | IOException e) {
 			e.printStackTrace();
 		}
 	}
