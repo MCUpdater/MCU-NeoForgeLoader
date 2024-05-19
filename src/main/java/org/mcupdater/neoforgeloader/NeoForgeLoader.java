@@ -1,10 +1,11 @@
-package org.mcupdater.forgeloader;
+package org.mcupdater.neoforgeloader;
 
 import net.minecraftforge.installer.SimpleInstaller;
 import net.minecraftforge.installer.actions.*;
 import net.minecraftforge.installer.json.InstallV1;
 import net.minecraftforge.installer.json.OptionalLibrary;
 import net.minecraftforge.installer.json.Util;
+import net.minecraftforge.installer.ui.TranslatedMessage;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -14,15 +15,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class ForgeLoader {
+public class NeoForgeLoader {
 
-	public static void main(String[] args) throws ClassNotFoundException {
+	public static void main(String[] args) {
 		File installPath = new File(args[0]);
 		String side = args[1];
 
 		File profiles = new File(installPath, "launcher_profiles.json");
 		if (!profiles.exists()) {
-			InputStream inStream = ForgeLoader.class.getResourceAsStream("/launcher_profiles.json");
+			InputStream inStream = NeoForgeLoader.class.getResourceAsStream("/launcher_profiles.json");
 			try {
 				Files.copy(inStream, profiles.toPath());
 			} catch (IOException e) {
@@ -36,10 +37,10 @@ public class ForgeLoader {
 		InstallV1 profile = Util.loadInstallProfile();
 		ProgressCallback monitor;
 		try {
-			monitor = ProgressCallback.withOutputs(new OutputStream[]{System.out, getLog()});
+			monitor = ProgressCallback.withOutputs(System.out, getLog());
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			monitor = ProgressCallback.withOutputs(new OutputStream[]{System.out});
+			monitor = ProgressCallback.withOutputs(System.out);
 		}
 		switch(side.toLowerCase()) {
 			case "client":
@@ -49,7 +50,22 @@ public class ForgeLoader {
 				action = new ServerInstall(profile, monitor);
 				break;
 			default:
-				action = new ExtractAction(profile, monitor);
+				action = new Action(profile, monitor, false) {
+					@Override
+					public boolean run(File file, Predicate<String> predicate, File file1) {
+						return false;
+					}
+
+					@Override
+					public TargetValidator getTargetValidator() {
+						return null;
+					}
+
+					@Override
+					public TranslatedMessage getSuccessMessage() {
+						return null;
+					}
+				};
 		}
 		Predicate<String> optPred = input -> {
 			Optional<OptionalListEntry> ent = optionals.stream().filter(e -> e.lib.getArtifact().equals(input)).findFirst();

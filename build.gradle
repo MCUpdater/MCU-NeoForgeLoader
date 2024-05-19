@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    compileOnly files('libs/ForgeInstaller.jar')
+    compileOnly files('libs/NeoForgeInstaller.jar')
 }
